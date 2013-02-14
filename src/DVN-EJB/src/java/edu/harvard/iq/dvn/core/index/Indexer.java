@@ -65,6 +65,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.PorterStemFilter;
@@ -90,6 +91,10 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.util.Version;
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.common.SolrInputDocument;
 
 /**
  *
@@ -185,8 +190,44 @@ public class Indexer implements java.io.Serializable  {
             sv = study.getReleasedVersion();
             Metadata metadata = sv.getMetadata();
 
+            logger.info("Start indexing study " + study.getStudyId());
 
+            String url = "http://localhost:8983/solr";
+            /*
+             Warning from https://wiki.apache.org/solr/Solrj
+         
+             HttpSolrServer is thread-safe and if you are using the following constructor,
+             you *MUST* re-use the same instance for all requests.  If instances are created on
+             the fly, it can cause a connection leak. The recommended practice is to keep a
+             static instance of HttpSolrServer per solr server url and share it for all requests.
+             See https://issues.apache.org/jira/browse/SOLR-861 for more details
+             */
+            String input_to_add ="FIXME1";
+            String defaultManu = "FIXME2";
+            SolrServer server = new HttpSolrServer(url);
             Document doc = new Document();
+            SolrInputDocument doc1 = new SolrInputDocument();
+            //doc1.addField("id", input_to_add, 1.0f);
+            //doc1.addField("name", input_to_add, 1.0f);
+            //doc1.addField("manu", defaultManu);
+            
+            doc1.addField("id", study.getStudyId(), 1.0f);
+            doc1.addField("name", metadata.getTitle(), 1.0f);
+            doc1.addField("manu", Long.toString(study.getOwner().getId()));
+ 
+            Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
+            docs.add(doc1);
+            try {
+                server.add(docs);
+            } catch (SolrServerException ex) {
+                Logger.getLogger(Indexer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                server.commit();
+            } catch (SolrServerException ex) {
+                Logger.getLogger(Indexer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
             logger.fine("Start indexing study " + study.getStudyId());
             addText(4.0f, doc, "title", metadata.getTitle());
             addKeyword(doc, "id", study.getId().toString());
