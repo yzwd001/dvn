@@ -200,36 +200,23 @@ public class Indexer implements java.io.Serializable  {
             Metadata metadata = sv.getMetadata();
 
             logger.info("Start indexing study " + study.getStudyId());
-            String input_to_add = "FIXME1";
-            String defaultManu = "FIXME2";
             Document doc = new Document();
             SolrInputDocument doc1 = new SolrInputDocument();
-            //doc1.addField("id", input_to_add, 1.0f);
-            //doc1.addField("name", input_to_add, 1.0f);
-            //doc1.addField("manu", defaultManu);
-            
-            doc1.addField("id", study.getStudyId(), 1.0f);
-            doc1.addField("name", metadata.getTitle(), 1.0f);
-            doc1.addField("manu", Long.toString(study.getOwner().getId()));
+            //doc1.addField("name", metadata.getTitle(), 1.0f);
+            //doc1.addField("manu", Long.toString(study.getOwner().getId()));
  
-            Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
-            docs.add(doc1);
-            try {
-                server.add(docs);
-            } catch (SolrServerException ex) {
-                Logger.getLogger(Indexer.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            try {
-                server.commit();
-            } catch (SolrServerException ex) {
-                Logger.getLogger(Indexer.class.getName()).log(Level.SEVERE, null, ex);
-            }
             
             logger.fine("Start indexing study " + study.getStudyId());
             addText(4.0f, doc, "title", metadata.getTitle());
+            /**
+             * @todo title should get 4.0f
+             */
+            doc1.addField("title", metadata.getTitle(), 1.0f);
             addKeyword(doc, "id", study.getId().toString());
+            doc1.addField("id", study.getId(), 1.0f);
             addText(1.0f, doc, "studyId", study.getStudyId());
             addKeyword(doc, "studyId", study.getStudyId());
+            doc1.addField("studyId", study.getStudyId(), 1.0f);
 //        addText(1.0f,  doc,"owner",study.getOwner().getName());
             addText(1.0f, doc, "dvOwnerId", Long.toString(study.getOwner().getId()));
             addDate(1.0f, doc, "productionDate", metadata.getProductionDate());
@@ -568,6 +555,20 @@ public class Indexer implements java.io.Serializable  {
             }
             writerVersions.close();
             logger.fine("End indexing study " + study.getStudyId());
+
+            Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
+            docs.add(doc1);
+            try {
+                server.add(docs);
+            } catch (SolrServerException ex) {
+                Logger.getLogger(Indexer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                server.commit();
+            } catch (SolrServerException ex) {
+                Logger.getLogger(Indexer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        
         }
     }
 
@@ -1124,10 +1125,10 @@ public class Indexer implements java.io.Serializable  {
                 logger.info("Search term: FIXME");
                 for (SolrDocument doc : docs) {
                     logger.info(doc.toString());
-                    String name = doc.getFieldValue("name").toString();
-                    String manu = doc.getFieldValue("manu").toString();
-                    logger.info(name + " (" + manu + ")");
-                    resultString += name + " (" + manu + ")\n";
+                    String id = doc.getFieldValue("id").toString();
+                    String title = doc.getFieldValue("title").toString();
+                    logger.info(id + " (" + title + ")");
+                    resultString += id + " (" + title + ")\n";
                 }
                 logger.info("resultString = " + resultString);
             } catch (SolrServerException ex) {
