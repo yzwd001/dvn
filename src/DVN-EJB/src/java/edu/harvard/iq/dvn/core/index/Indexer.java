@@ -91,9 +91,13 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.util.Version;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
 /**
@@ -1112,6 +1116,47 @@ public class Indexer implements java.io.Serializable  {
             }
             logger.fine("done iterate: " + DateTools.dateToString(new Date(), Resolution.MILLISECOND));
             searcher.close();
+            
+            /**
+             * @todo what if solr is down?
+             */
+            String url = "http://localhost:8983/solr";
+            /*
+             Warning from https://wiki.apache.org/solr/Solrj
+         
+             HttpSolrServer is thread-safe and if you are using the following constructor,
+             you *MUST* re-use the same instance for all requests.  If instances are created on
+             the fly, it can cause a connection leak. The recommended practice is to keep a
+             static instance of HttpSolrServer per solr server url and share it for all requests.
+             See https://issues.apache.org/jira/browse/SOLR-861 for more details
+             */
+
+            SolrServer server = new HttpSolrServer(url);
+            SolrQuery query2 = new SolrQuery();
+            /**
+             * @todo pass actual query
+             */
+            query2.setQuery("*study*");
+            QueryResponse rsp;
+
+            try {
+                rsp = server.query(query2);
+                SolrDocumentList docs = rsp.getResults();
+                String resultString = docs.size() + " results\n";
+                logger.info("Search term: FIXME");
+                for (SolrDocument doc : docs) {
+                    logger.info(doc.toString());
+                    String name = doc.getFieldValue("name").toString();
+                    String manu = doc.getFieldValue("manu").toString();
+                    logger.info(name + " (" + manu + ")");
+                    resultString += name + " (" + manu + ")\n";
+                }
+                logger.info("resultString = " + resultString);
+            } catch (SolrServerException ex) {
+                Logger.getLogger(Indexer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            
         }
         matchIds.addAll(matchIdsSet);
         return matchIds;
