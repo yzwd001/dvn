@@ -117,6 +117,11 @@ public class Indexer implements java.io.Serializable  {
     Directory dir;
     String indexDir = "index-dir";
     int dvnMaxClauseCount = Integer.MAX_VALUE;
+    /**
+     * @todo what if solr is down?
+     */
+    private static final String url = "http://localhost:8983/solr";
+    private static final SolrServer server = new HttpSolrServer(url);
     
 
     /** Creates a new instance of Indexer */
@@ -195,20 +200,8 @@ public class Indexer implements java.io.Serializable  {
             Metadata metadata = sv.getMetadata();
 
             logger.info("Start indexing study " + study.getStudyId());
-
-            String url = "http://localhost:8983/solr";
-            /*
-             Warning from https://wiki.apache.org/solr/Solrj
-         
-             HttpSolrServer is thread-safe and if you are using the following constructor,
-             you *MUST* re-use the same instance for all requests.  If instances are created on
-             the fly, it can cause a connection leak. The recommended practice is to keep a
-             static instance of HttpSolrServer per solr server url and share it for all requests.
-             See https://issues.apache.org/jira/browse/SOLR-861 for more details
-             */
-            String input_to_add ="FIXME1";
+            String input_to_add = "FIXME1";
             String defaultManu = "FIXME2";
-            SolrServer server = new HttpSolrServer(url);
             Document doc = new Document();
             SolrInputDocument doc1 = new SolrInputDocument();
             //doc1.addField("id", input_to_add, 1.0f);
@@ -1116,22 +1109,7 @@ public class Indexer implements java.io.Serializable  {
             }
             logger.fine("done iterate: " + DateTools.dateToString(new Date(), Resolution.MILLISECOND));
             searcher.close();
-            
-            /**
-             * @todo what if solr is down?
-             */
-            String url = "http://localhost:8983/solr";
-            /*
-             Warning from https://wiki.apache.org/solr/Solrj
-         
-             HttpSolrServer is thread-safe and if you are using the following constructor,
-             you *MUST* re-use the same instance for all requests.  If instances are created on
-             the fly, it can cause a connection leak. The recommended practice is to keep a
-             static instance of HttpSolrServer per solr server url and share it for all requests.
-             See https://issues.apache.org/jira/browse/SOLR-861 for more details
-             */
 
-            SolrServer server = new HttpSolrServer(url);
             SolrQuery query2 = new SolrQuery();
             /**
              * @todo pass actual query
