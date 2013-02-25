@@ -107,10 +107,10 @@ import org.apache.solr.common.SolrInputDocument;
 public class Indexer implements java.io.Serializable  {
 
     private static final Logger logger = Logger.getLogger("edu.harvard.iq.dvn.core.index.Indexer");
-    private static IndexWriter writer;
-    private static IndexWriter writerVar;
-    private static IndexWriter writerVersions;
-    private static IndexWriter writerFileMeta; 
+//    private static IndexWriter writer;
+//    private static IndexWriter writerVar;
+//    private static IndexWriter writerVersions;
+//    private static IndexWriter writerFileMeta; 
     private static IndexReader r;
     private static IndexSearcher searcher;
     private static Indexer indexer;
@@ -200,8 +200,8 @@ public class Indexer implements java.io.Serializable  {
             Metadata metadata = sv.getMetadata();
 
             logger.info("Start indexing study " + study.getStudyId());
-            Document doc = new Document();
-            SolrInputDocument doc1 = new SolrInputDocument();
+//            Document doc = new Document();
+            SolrInputDocument doc = new SolrInputDocument();
             //doc1.addField("name", metadata.getTitle(), 1.0f);
             //doc1.addField("manu", Long.toString(study.getOwner().getId()));
  
@@ -211,12 +211,13 @@ public class Indexer implements java.io.Serializable  {
             /**
              * @todo title should get 4.0f
              */
-            doc1.addField("title", metadata.getTitle(), 1.0f);
-            addKeyword(doc, "id", study.getId().toString());
-            doc1.addField("id", study.getId(), 1.0f);
+//            doc1.addField("title", metadata.getTitle(), 1.0f);
+            //addKeyword(doc, "id", study.getId().toString());
+            addText(1.0f, doc, "id", study.getId().toString());
+//            doc1.addField("id", study.getId(), 1.0f);
             addText(1.0f, doc, "studyId", study.getStudyId());
-            addKeyword(doc, "studyId", study.getStudyId());
-            doc1.addField("studyId", study.getStudyId(), 1.0f);
+//            addKeyword(doc, "studyId", study.getStudyId());
+//            doc1.addField("studyId", study.getStudyId(), 1.0f);
 //        addText(1.0f,  doc,"owner",study.getOwner().getName());
             addText(1.0f, doc, "dvOwnerId", Long.toString(study.getOwner().getId()));
             addDate(1.0f, doc, "productionDate", metadata.getProductionDate());
@@ -244,7 +245,7 @@ public class Indexer implements java.io.Serializable  {
             Collection<StudyAuthor> studyAuthors = metadata.getStudyAuthors();
             for (Iterator it = studyAuthors.iterator(); it.hasNext();) {
                 StudyAuthor elem = (StudyAuthor) it.next();
-                addText(3.0f, doc, "authorName", elem.getName());
+//                addText(3.0f, doc, "authorName", elem.getName());
                 addText(1.0f, doc, "authorName", elem.getName());
                 addText(1.0f, doc, "authorAffiliation", elem.getAffiliation());
             }
@@ -477,12 +478,12 @@ public class Indexer implements java.io.Serializable  {
 
             addText(1.0f, doc, "unf", metadata.getUNF());
 //        writer = new IndexWriter(dir, true, getAnalyzer(), isIndexEmpty());
-            writer = new IndexWriter(dir, getAnalyzer(), isIndexEmpty(), IndexWriter.MaxFieldLength.UNLIMITED);
-            writer.setUseCompoundFile(true);
-            writer.addDocument(doc);
-            writer.close();
+//            writer = new IndexWriter(dir, getAnalyzer(), isIndexEmpty(), IndexWriter.MaxFieldLength.UNLIMITED);
+//            writer.setUseCompoundFile(true);
+//            writer.addDocument(doc);
+//            writer.close();
             
-            writerVar = new IndexWriter(dir, getAnalyzer(), isIndexEmpty(), IndexWriter.MaxFieldLength.UNLIMITED);
+//            writerVar = new IndexWriter(dir, getAnalyzer(), isIndexEmpty(), IndexWriter.MaxFieldLength.UNLIMITED);
             
             
 
@@ -494,20 +495,20 @@ public class Indexer implements java.io.Serializable  {
                     if (dataTable != null) {
                         List<DataVariable> dataVariables = dataTable.getDataVariables();
                         for (int j = 0; j < dataVariables.size(); j++) {
-                            Document docVariables = new Document();
+                            SolrInputDocument docVariables = new SolrInputDocument();
                             addText(1.0f, docVariables, "varStudyId", study.getId().toString());
                             addText(1.0f, docVariables, "varStudyFileId", elem.getId().toString());
                             DataVariable dataVariable = dataVariables.get(j);
                             addText(1.0f, docVariables, "varId", dataVariable.getId().toString());
                             addText(1.0f, docVariables, "varName", dataVariable.getName());
                             addText(1.0f, docVariables, "varLabel", dataVariable.getLabel());
-                            writerVar.addDocument(docVariables);
+//                            writerVar.addDocument(docVariables);
                         }
                     }
                 } 
             }
             
-            writerVar.close();
+//            writerVar.close();
 
             writerFileMeta = new IndexWriter(dir, getAnalyzer(), isIndexEmpty(), IndexWriter.MaxFieldLength.UNLIMITED);
             
@@ -540,24 +541,26 @@ public class Indexer implements java.io.Serializable  {
             writerFileMeta.close(); 
            
             
-            writerVersions = new IndexWriter(dir, new WhitespaceAnalyzer(), isIndexEmpty(), IndexWriter.MaxFieldLength.UNLIMITED);
+//            writerVersions = new IndexWriter(dir, new WhitespaceAnalyzer(), isIndexEmpty(), IndexWriter.MaxFieldLength.UNLIMITED);
             for (StudyVersion version : study.getStudyVersions()) {
                 // The current(released) version UNF is indexed in the main document
                 // only index previous(archived) version UNFs here
                 if (version.isArchived()) {
-                    Document docVersions = new Document();
-                    addKeyword(docVersions, "versionStudyId", study.getId().toString());
+                    SolrInputDocument docVersions = new SolrInputDocument();
+                    //addKeyword(docVersions, "versionStudyId", study.getId().toString());
+                    addText(1.0f, docVersions, "versionStudyId", study.getId().toString());
                     addText(1.0f, docVersions, "versionId", version.getId().toString());
                     addText(1.0f, docVersions, "versionNumber", version.getVersionNumber().toString());
-                    addKeyword(docVersions, "versionUnf", version.getMetadata().getUNF());
-                    writerVersions.addDocument(docVersions);
+//                    addKeyword(docVersions, "versionUnf", version.getMetadata().getUNF());
+                    addText(1.0f, docVersions, "versionUnf", version.getMetadata().getUNF());
+//                    writerVersions.addDocument(docVersions);
                 }
             }
-            writerVersions.close();
+//            writerVersions.close();
             logger.fine("End indexing study " + study.getStudyId());
 
             Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
-            docs.add(doc1);
+            docs.add(doc);
             try {
                 server.add(docs);
             } catch (SolrServerException ex) {
@@ -579,32 +582,38 @@ public class Indexer implements java.io.Serializable  {
         return new DVNAnalyzer();
     }
 
-    protected void addDate(float boost, Document doc,String key, String value){
+    protected void addDate(float boost, SolrInputDocument doc, String key, String value) {
         addText( 1.0f, doc, key, value );
-        addKeyword( doc,key, value );
+//        addKeyword( doc,key, value );
     }
     
-    protected void addKeyword(Document doc,String key, String value){
-        if (value != null && value.length()>0){
-            doc.add(new Field(key,value.toLowerCase().trim(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-            doc.add(new Field(key,value.trim(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-        }
-    }
+//    protected void addKeyword(SolrInputDocument doc, String key, String value){
+//        if (value != null && value.length()>0){
+//            doc.add(new Field(key,value.toLowerCase().trim(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+//            doc.add(new Field(key,value.trim(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+//            doc.addField(key, value);
+//        }
+//    }
 
-    protected void addText(float boost, Document doc,String key, String value){
+    protected void addText(float boost, SolrInputDocument doc, String key, String value){
         if (value != null && value.length()>0){
             Field f1 = new Field(key,value.toLowerCase().trim(),Field.Store.YES, Field.Index.ANALYZED);
             Field f2 = new Field(key,value.trim(), Field.Store.YES, Field.Index.NOT_ANALYZED);
             f1.setBoost(boost);
             f2.setBoost(boost);
-            doc.add(f1);
-            doc.add(f2);
+//            doc.add(f1);
+//            doc.add(f2);
+            /** @todo set boost */
+            doc.addField(key, value, 1.0f);
         }
     }
 
 
     public List search(List <Long> studyIds, List <SearchTerm> searchTerms) throws IOException{
         logger.fine("Start search: "+DateTools.dateToString(new Date(), Resolution.MILLISECOND));
+        logger.info("searchTerms = " + searchTerms.toString());
+        logger.info("searchTerms getValue = " + searchTerms.get(0).getValue().toString());
+        String solrQueryString = searchTerms.get(0).getValue().toString();
         Long[] studyIdsArray = null;
         if (studyIds != null) {
             studyIdsArray = studyIds.toArray(new Long[studyIds.size()]);
@@ -681,7 +690,15 @@ public class Indexer implements java.io.Serializable  {
         if ( containsStudyLevelAndTerms ) {
             BooleanQuery searchTermsQuery = andSearchTermClause(studyLevelSearchTerms);
             searchParts.add(searchTermsQuery);
-            BooleanQuery searchQuery = andQueryClause(searchParts);
+            //BooleanQuery searchQuery = andQueryClause(searchParts);
+            SolrQuery searchQuery = new SolrQuery();
+//            searchQuery.setQuery( searchTerms.toString() );
+            /**
+             * @todo: don't make user learn Solr syntax, such as "*:*",
+             * "authorName:*Durbin*", etc.
+             */
+            searchQuery.setQuery( solrQueryString );
+//            searchQuery.setQuery( "*:*" );
             logger.fine("Start hits: " + DateTools.dateToString(new Date(), Resolution.MILLISECOND));
             logger.info("INDEXER: search query (native): "+searchQuery.toString());
             nvResults = getHitIds(searchQuery);
@@ -724,11 +741,12 @@ public class Indexer implements java.io.Serializable  {
                         studyIdsArray = results.toArray(new Long[results.size()]);
                         Arrays.sort(studyIdsArray);
                     }
-                    BooleanQuery searchQuery = new BooleanQuery();
+                    //BooleanQuery searchQuery = new BooleanQuery();
+                    SolrQuery searchQuery = new SolrQuery();
                     List <TermQuery> termQueries = orLongEqSearchTermQueries(results, "id");
                     for (Iterator clausesIter = termQueries.iterator(); clausesIter.hasNext();){
                         TermQuery termQuery = (TermQuery) clausesIter.next();
-                        searchQuery.add(termQuery, BooleanClause.Occur.SHOULD);
+//                        searchQuery.add(termQuery, BooleanClause.Occur.SHOULD);
                     }
                     
                     for (Iterator it = searchTerms.iterator(); it.hasNext();) {
@@ -740,9 +758,9 @@ public class Indexer implements java.io.Serializable  {
                             Term term = new Term(elem.getFieldName(), elem.getValue());
                             TermQuery termQuery = new TermQuery(term);
                             if (elem.getOperator().equals("=")) {
-                                searchQuery.add(termQuery, BooleanClause.Occur.MUST);
+//                                searchQuery.add(termQuery, BooleanClause.Occur.MUST);
                             } else {
-                                searchQuery.add(termQuery, BooleanClause.Occur.MUST_NOT);
+//                                searchQuery.add(termQuery, BooleanClause.Occur.MUST_NOT);
                             }
                         }
                     }
@@ -897,12 +915,13 @@ public class Indexer implements java.io.Serializable  {
     }
 
     public List search(SearchTerm searchTerm) throws IOException {
-        Query indexQuery = null;
+//        Query indexQuery = null;
+        SolrQuery indexQuery = new SolrQuery();
         if (searchTerm.getFieldName().equalsIgnoreCase("any")){
-            indexQuery = buildAnyQuery(searchTerm.getValue().toLowerCase().trim());
+//            indexQuery = buildAnyQuery(searchTerm.getValue().toLowerCase().trim());
         }else{
             Term t = new Term(searchTerm.getFieldName(),searchTerm.getValue().toLowerCase().trim());
-            indexQuery = new TermQuery(t);
+//            indexQuery = new TermQuery(t);
         }
         return getHitIds(indexQuery);
     }
@@ -918,10 +937,11 @@ public class Indexer implements java.io.Serializable  {
      * 
      *
     public List searchVariables(SearchTerm searchTerm) throws IOException {
-        Query indexQuery = null;
+//        Query indexQuery = null;
+        SolrQuery indexQuery = new SolrQuery();
         if (searchTerm.getFieldName().equalsIgnoreCase("variable")){
 //            indexQuery = buildVariableQuery(searchTerm.getValue().toLowerCase().trim());
-            indexQuery = buildVariableQuery(searchTerm);
+//            indexQuery = buildVariableQuery(searchTerm);
         }
         return getHitIds(indexQuery);
     }
@@ -1088,38 +1108,40 @@ public class Indexer implements java.io.Serializable  {
     }
 
  
-    private List getHitIds( Query query) throws IOException {
+    private List getHitIds( SolrQuery query) throws IOException {
+        logger.info("query = " + query.toString());
         ArrayList matchIds = new ArrayList();
         LinkedHashSet matchIdsSet = new LinkedHashSet();
-        if (query != null){
-            initIndexSearcher();
-            logger.fine("Start searcher: " + DateTools.dateToString(new Date(), Resolution.MILLISECOND));
-            DocumentCollector s = new DocumentCollector(searcher);
-            searcher.search(query, s);
+//        if (query != null){
+//            initIndexSearcher();
+            logger.info("Start searcher: " + DateTools.dateToString(new Date(), Resolution.MILLISECOND));
+//            DocumentCollector s = new DocumentCollector(searcher);
+//            searcher.search(query, s);
 //            searcher.close();
-            logger.fine("done searcher: " + DateTools.dateToString(new Date(), Resolution.MILLISECOND));
-            logger.fine("Start iterate: " + DateTools.dateToString(new Date(), Resolution.MILLISECOND));
-            List hits = s.getStudies();
-            for (int i = 0; i < hits.size(); i++) {
-                ScoreDoc sd = (ScoreDoc) hits.get(i);
-                Document d = searcher.doc(sd.doc);
-                Field studyId = d.getField("id");
-                String studyIdStr = studyId.stringValue();
-                Long studyIdLong = Long.valueOf(studyIdStr);
-                matchIdsSet.add(studyIdLong);
-            }
+            logger.info("done searcher: " + DateTools.dateToString(new Date(), Resolution.MILLISECOND));
+            logger.info("Start iterate: " + DateTools.dateToString(new Date(), Resolution.MILLISECOND));
+//            List hits = s.getStudies();
+//            logger.info("hits = " + hits.size());
+//            for (int i = 0; i < hits.size(); i++) {
+//                ScoreDoc sd = (ScoreDoc) hits.get(i);
+//                Document d = searcher.doc(sd.doc);
+//                Field studyId = d.getField("id");
+//                String studyIdStr = studyId.stringValue();
+//                Long studyIdLong = Long.valueOf(studyIdStr);
+//                matchIdsSet.add(studyIdLong);
+//            }
             logger.fine("done iterate: " + DateTools.dateToString(new Date(), Resolution.MILLISECOND));
-            searcher.close();
+//            searcher.close();
 
-            SolrQuery query2 = new SolrQuery();
+//            SolrQuery query2 = new SolrQuery();
             /**
              * @todo pass actual query
              */
-            query2.setQuery("*study*");
+//            query2.setQuery("*study*");
             QueryResponse rsp;
 
             try {
-                rsp = server.query(query2);
+                rsp = server.query(query);
                 SolrDocumentList docs = rsp.getResults();
                 String resultString = docs.size() + " results\n";
                 logger.info("Search term: FIXME");
@@ -1129,6 +1151,9 @@ public class Indexer implements java.io.Serializable  {
                     String title = doc.getFieldValue("title").toString();
                     logger.info(id + " (" + title + ")");
                     resultString += id + " (" + title + ")\n";
+                    String studyIdStr = doc.getFieldValue("id").toString();
+                    Long studyIdLong = Long.valueOf(studyIdStr);
+                    matchIdsSet.add(studyIdLong);
                 }
                 logger.info("resultString = " + resultString);
             } catch (SolrServerException ex) {
@@ -1136,7 +1161,7 @@ public class Indexer implements java.io.Serializable  {
             }
 
             
-        }
+//        }
         matchIds.addAll(matchIdsSet);
         return matchIds;
     }
