@@ -71,6 +71,7 @@ import javax.jms.QueueSession;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import org.apache.solr.client.solrj.SolrServerException;
 
 /**
  *
@@ -409,6 +410,8 @@ public class IndexServiceBean implements edu.harvard.iq.dvn.core.index.IndexServ
                 matchingStudyIds = indexer.search(studyIds, searchTerms);
             } catch (IOException ex) {
                 ex.printStackTrace();
+            } catch (SolrServerException solrServerException) {
+                Logger.getLogger(Indexer.class.getName()).log(Level.SEVERE, null, solrServerException);
             }
         }
         return matchingStudyIds;
@@ -423,6 +426,8 @@ public class IndexServiceBean implements edu.harvard.iq.dvn.core.index.IndexServ
             matchingStudyIds = indexer.search(studyIds, searchTerms);
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (SolrServerException solrServerException) {
+            Logger.getLogger(Indexer.class.getName()).log(Level.SEVERE, null, solrServerException);
         }
         return matchingStudyIds == null ? new ArrayList() : matchingStudyIds;
     }
@@ -446,6 +451,8 @@ public class IndexServiceBean implements edu.harvard.iq.dvn.core.index.IndexServ
             matchingStudyIds = indexer.search(studyIds, searchTerms);
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (SolrServerException solrServerException) {
+            Logger.getLogger(Indexer.class.getName()).log(Level.SEVERE, null, solrServerException);
         }
         return matchingStudyIds == null ? new ArrayList() : matchingStudyIds;
     }
@@ -457,6 +464,8 @@ public class IndexServiceBean implements edu.harvard.iq.dvn.core.index.IndexServ
             matchingStudyIds = indexer.search(searchTerm);
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (SolrServerException solrServerException) {
+            Logger.getLogger(Indexer.class.getName()).log(Level.SEVERE, null, solrServerException);
         }
         return matchingStudyIds == null ? new ArrayList() : matchingStudyIds;
     }
@@ -473,6 +482,8 @@ public class IndexServiceBean implements edu.harvard.iq.dvn.core.index.IndexServ
             matchingVarIds = indexer.searchVariables(searchTerm);
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (SolrServerException solrServerException) {
+            Logger.getLogger(Indexer.class.getName()).log(Level.SEVERE, null, solrServerException);
         }
         Map variableMap = new HashMap();
         return matchingStudyIds;
