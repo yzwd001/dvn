@@ -117,9 +117,6 @@ public class Indexer implements java.io.Serializable  {
     Directory dir;
     String indexDir = "index-dir";
     int dvnMaxClauseCount = Integer.MAX_VALUE;
-    /**
-     * @todo what if solr is down?
-     */
     private static final String url = "http://localhost:8983/solr";
     private static final SolrServer server = new HttpSolrServer(url);
     
@@ -609,7 +606,10 @@ public class Indexer implements java.io.Serializable  {
     }
 
 
-    public List search(List <Long> studyIds, List <SearchTerm> searchTerms) throws IOException{
+    /**
+     * @todo Show a more user-friendly error if Solr is down
+     */
+    public List search(List <Long> studyIds, List <SearchTerm> searchTerms) throws IOException, SolrServerException{
         logger.fine("Start search: "+DateTools.dateToString(new Date(), Resolution.MILLISECOND));
         logger.info("searchTerms = " + searchTerms.toString());
         logger.info("searchTerms getValue = " + searchTerms.get(0).getValue().toString());
@@ -914,7 +914,7 @@ public class Indexer implements java.io.Serializable  {
         return phrase;
     }
 
-    public List search(SearchTerm searchTerm) throws IOException {
+    public List search(SearchTerm searchTerm) throws IOException, SolrServerException {
 //        Query indexQuery = null;
         SolrQuery indexQuery = new SolrQuery();
         if (searchTerm.getFieldName().equalsIgnoreCase("any")){
@@ -1108,7 +1108,7 @@ public class Indexer implements java.io.Serializable  {
     }
 
  
-    private List getHitIds( SolrQuery query) throws IOException {
+    private List getHitIds( SolrQuery query) throws IOException, SolrServerException {
         logger.info("query = " + query.toString());
         ArrayList matchIds = new ArrayList();
         LinkedHashSet matchIdsSet = new LinkedHashSet();
@@ -1138,28 +1138,15 @@ public class Indexer implements java.io.Serializable  {
              * @todo pass actual query
              */
 //            query2.setQuery("*study*");
-            QueryResponse rsp;
-
-            try {
-                rsp = server.query(query);
-                SolrDocumentList docs = rsp.getResults();
-                String resultString = docs.size() + " results\n";
-                logger.info("Search term: FIXME");
-                for (SolrDocument doc : docs) {
-                    logger.info(doc.toString());
-                    String id = doc.getFieldValue("id").toString();
-                    String title = doc.getFieldValue("title").toString();
-                    logger.info(id + " (" + title + ")");
-                    resultString += id + " (" + title + ")\n";
-                    String studyIdStr = doc.getFieldValue("id").toString();
-                    Long studyIdLong = Long.valueOf(studyIdStr);
-                    matchIdsSet.add(studyIdLong);
-                }
-                logger.info("resultString = " + resultString);
-            } catch (SolrServerException ex) {
-                Logger.getLogger(Indexer.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
+            
+        QueryResponse rsp;
+        rsp = server.query(query);
+        SolrDocumentList docs = rsp.getResults();
+        for (SolrDocument doc : docs) {
+            String studyIdStr = doc.getFieldValue("id").toString();
+            Long studyIdLong = Long.valueOf(studyIdStr);
+            matchIdsSet.add(studyIdLong);
+        }
             
 //        }
         matchIds.addAll(matchIdsSet);
